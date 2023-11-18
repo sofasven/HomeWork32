@@ -203,7 +203,11 @@
                                     <action selector="addNewTaskAction:" destination="ENt-De-0gY" id="wPf-KJ-Yq3"/>
                                 </connections>
                             </barButtonItem>
-                            <barButtonItem title="Add image" id="oOu-vn-cmh"/>
+                            <barButtonItem title="Add image" id="oOu-vn-cmh">
+                                <connections>
+                                    <action selector="addNewImage:" destination="ENt-De-0gY" id="V3R-MY-kfD"/>
+                                </connections>
+                            </barButtonItem>
                         </rightBarButtonItems>
                     </navigationItem>
                 </tableViewController>

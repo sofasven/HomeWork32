@@ -55,6 +55,26 @@ class TasksTVC: UITableViewController {
         present(alert, animated: true)
     }
     
+    @IBAction func addNewImage(_ sender: UIBarButtonItem) {
+        let storageRef = Storage.storage().reference()
+        let imageKey = NSUUID().uuidString
+        let imageRef = storageRef.child(imageKey)
+        guard let imageData = #imageLiteral(resourceName: "image.jpeg").pngData() else { return }
+        let uploadTask = imageRef.putData(imageData) { storageMetadata, error in
+            print("\nstorageMetadata:\n\(storageMetadata)\n")
+            print("\nerror:\n\(error)\n")
+            
+            let downloadTask = imageRef.getData(maxSize: 999999999999999) { data, error in
+                if let data = data {
+                    print("\n data: \n\(data)\n")
+                    let image = UIImage(data: data)
+                    print(image)
+                } else {
+                    print("\n error:\n\(error)\n")
+                }
+            }
+        }
+    }
     
     
     @IBAction func signOutAction(_ sender: UIBarButtonItem) {
@@ -65,6 +85,8 @@ class TasksTVC: UITableViewController {
         }
         navigationController?.popToRootViewController(animated: true)
     }
+    
+    
     
     private func toggleComplition(cell: UITableViewCell, isCompleted: Bool) {
         cell.accessoryType = isCompleted ? .checkmark : .none
@@ -84,16 +106,22 @@ class TasksTVC: UITableViewController {
         toggleComplition(cell: cell, isCompleted: currentTask.isCompleted)
         return cell
     }
+    
+    // MARK: - Table view delegate
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let _ = tableView.cellForRow(at: indexPath)  else { return }
+        let task = tasks[indexPath.row]
+        let isCompleted = !task.isCompleted
+        task.ref.updateChildValues(["isCompleted" : isCompleted])
+    }
 
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool { true }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-//        if editingStyle == .delete {
-//            // Delete the row from the data source
-//            tableView.deleteRows(at: [indexPath], with: .fade)
-//        } else if editingStyle == .insert {
-//            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-//        }
-    }
+            guard editingStyle == .delete else { return }
+            let task = tasks[indexPath.row]
+            task.ref.removeValue()
+        }
 
 }
